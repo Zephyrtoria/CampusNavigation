@@ -96,7 +96,7 @@ namespace Graph {
             return dsu.isSingle();
         }
 
-        void makeGraphConnected(LGraph& graph) {
+        void makeGraphConnected(LGraph& graph, bool mode) {
             int size = graph.getVertexNumber();
             DSU dsu(size);
             auto& allNodes = graph.getGraphList();
@@ -111,20 +111,33 @@ namespace Graph {
             std::mt19937 gen(rd()); // Mersenne Twister 引擎
             std::uniform_int_distribution<> dis(0, 500);  // 生成 0 到 500 之间的整数
             std::uniform_int_distribution<> vex(0, size - 1);  // 生成 0 到 size - 1 之间的整数
-            while (!dsu.isSingle()) {
-                Vertex i = vex(gen);
-                for (Vertex j = 0; j < size; j++) {
-                    if (!dsu.same(i, j)) {
-                        std::cout << "地点" << graph.getNameById(i) << "与" << graph.getNameById(j) <<
-                            "之间不连通，请输入边的权重（输入0则会添加随机权重） ";
-                        GElemSet in;
-                        std::cin >> in;
-                        if (in == 0) {
-                            in = dis(gen);
+            if (!mode) {
+                while (!dsu.isSingle()) {
+                    Vertex i = vex(gen);
+                    for (Vertex j = 0; j < size; j++) {
+                        if (!dsu.same(i, j)) {
+                            graph.insertEdge(i, j, dis(gen));
+                            dsu.unite(i, j);
+                            break;
                         }
-                        graph.insertEdge(i, j, in);
-                        dsu.unite(i, j);
-                        break;
+                    }
+                }
+            } else {
+                while (!dsu.isSingle()) {
+                    Vertex i = vex(gen);
+                    for (Vertex j = 0; j < size; j++) {
+                        if (!dsu.same(i, j)) {
+                            std::cout << "地点" << graph.getNameById(i) << "与" << graph.getNameById(j) <<
+                                "之间不连通，请输入边的权重（输入0则会添加随机权重） ";
+                            GElemSet in;
+                            std::cin >> in;
+                            if (in == 0) {
+                                in = dis(gen);
+                            }
+                            graph.insertEdge(i, j, in);
+                            dsu.unite(i, j);
+                            break;
+                        }
                     }
                 }
             }

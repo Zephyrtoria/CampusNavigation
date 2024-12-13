@@ -16,8 +16,12 @@ using namespace Graph::Algorithm;
 
 // Hint: 如果不慎写坏项目附带的两个文件，可以在backup文件夹中获取原始文件
 // TODO: 请根据可执行文件和csv的位置填写文件路径
-const std::string nodes_path{"../resources/nodes.csv"};
-const std::string edges_path{"../resources/edges.csv"};
+const std::string nodes_path[]{
+    "../resources/small/nodes.csv", "../resources/medium/nodes.csv", "../resources/large/nodes.csv"
+};
+const std::string edges_path[]{
+    "../resources/small/edges.csv", "../resources/medium/edges.csv", "../resources/large/edges.csv"
+};
 
 struct edge {
     std::string from;
@@ -25,7 +29,7 @@ struct edge {
     int length;
 };
 
-void init(LGraph& graph);
+void init(LGraph& graph, int scale);
 
 std::vector<VertInfo> readNodesFromFile(const std::string& nodes_path);
 
@@ -40,8 +44,15 @@ void showAllNodes(const LGraph& graph);
 void showAllEdges(const LGraph& graph);
 
 int main() {
+    int scale{0};
+    std::cout << "欢迎使用校园导航系统！" << std::endl
+        << "请选择想使用的数据规模：" << std::endl
+        << "1.小规模" << std::endl
+        << "2.中规模" << std::endl
+        << "3.大规模" << std::endl;
+    std::cin >> scale;
     LGraph graph(false); //初始化一个无向图。
-    init(graph);
+    init(graph, scale);
     while (true) {
         int choice{0};
         std::cout << "欢迎使用校园导航系统！" << std::endl
@@ -104,7 +115,7 @@ int main() {
                 }
             } else if (choice == 5) {
                 std::cout << "正在将顶点存储到csv文件中..." << std::endl;
-                storeNodes(nodes_path, graph);
+                storeNodes(nodes_path[scale - 1], graph);
                 std::cout << "存储成功！" << std::endl;
             }
         } else if (choice == 2) { // 边相关操作
@@ -143,11 +154,11 @@ int main() {
                 graph.deleteEdge(from, to); // 删除一条边
             } else if (choice == 5) {
                 std::cout << "正在将边存储到csv文件中..." << std::endl;
-                storeEdges(edges_path, graph);
+                storeEdges(edges_path[scale - 1], graph);
                 std::cout << "存储成功！" << std::endl;
             }
         } else if (choice == 3) {// 从文件中重新加载点与边
-            init(graph);
+            init(graph, scale);
         } else if (choice == 4) { // 是否存在欧拉通路
             if (haveEulerCircle(graph)) {
                 std::cout << "存在欧拉回路" << std::endl;
@@ -186,11 +197,6 @@ int main() {
                 std::cout << "总权重为" << sum << std::endl;
             } else {
                 std::cout << "图不连通" << std::endl;
-                std::cout << "是否需要添加边使图连通？（是：1; 否：其他）" << std::endl;
-                std::cin >> choice;
-                if (choice == 1) {
-                    makeGraphConnected(graph);
-                }
             }
         } else if (choice == 7) { // 求解拓扑受限时的最短路径
             std::cout << "请输入您希望的拓扑序，第一行一个n为序列长度，第二行n个地点为拓扑序列" << std::endl;
@@ -205,7 +211,13 @@ int main() {
             std::cout << "最短路径为" << topologicalShortestPath(graph, list) << std::endl;
         } else if (choice == 8) {
             if (!isConnected(graph)) {
-                makeGraphConnected(graph);
+                std::cout << "0.自动连通" << std::endl << "1.手动连通：" << std::endl;
+                std::cin >> choice;
+                if (choice == 0) {
+                    makeGraphConnected(graph, false);
+                } else {
+                    makeGraphConnected(graph, true);
+                }
             } else {
                 std::cout << "图已经连通了！" << std::endl;
             }
@@ -278,10 +290,10 @@ std::vector<edge> readEdgesFromFile(const std::string& edges_path) {
     return edges;
 }
 
-void init(LGraph& graph) {
+void init(LGraph& graph, int scale) {
     graph = LGraph(false);
-    std::vector<VertInfo> nodes{readNodesFromFile(nodes_path)};        // 通过read_nodes函数获得顶点信息
-    std::vector<edge> edges{readEdgesFromFile(edges_path)};            // 通过read_edges函数获得边信息
+    std::vector<VertInfo> nodes{readNodesFromFile(nodes_path[scale - 1])};        // 通过read_nodes函数获得顶点信息
+    std::vector<edge> edges{readEdgesFromFile(edges_path[scale - 1])};            // 通过read_edges函数获得边信息
 
     for (auto& v : nodes) {
         // TODO: 向图graph中插入顶点

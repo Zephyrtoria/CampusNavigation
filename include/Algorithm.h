@@ -58,7 +58,7 @@ namespace Graph {
         std::list<Vertex> eulerCircle(LGraph& graph); //计算欧拉回路
         bool haveEulerCircle(const LGraph& graph); //判断是否存在欧拉回路
         bool isConnected(const LGraph& graph); //判断图是否联通
-        void makeGraphConnected(LGraph& graph); // 添加边
+        void makeGraphConnected(LGraph& graph, bool flag); // 添加边
         int getShortestPath(const LGraph& graph, const std::string& sourceName,
                             const std::string& destName); //计算单源最短路径
         int topologicalShortestPath(const LGraph& graph, std::vector<std::string> path); //计算拓扑受限的最短路径
