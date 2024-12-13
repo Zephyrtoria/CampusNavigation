@@ -15,6 +15,7 @@ namespace Graph {
             //TODO:从给定点出发获得一条回路
             int size = graph.getVertexNumber();
             bool visited[size];
+            std::memset(visited, false, sizeof(visited));
             std::list<Vertex> result;
             std::stack<Vertex> curPath;
             auto& allNodes = graph.getGraphList();
@@ -114,7 +115,7 @@ namespace Graph {
                 Vertex i = vex(gen);
                 for (Vertex j = 0; j < size; j++) {
                     if (!dsu.same(i, j)) {
-                        std::cout << "地点" << graph.getVertexName(i) << "与" << graph.getVertexName(j) <<
+                        std::cout << "地点" << graph.getNameById(i) << "与" << graph.getNameById(j) <<
                             "之间不连通，请输入边的权重（输入0则会添加随机权重） ";
                         GElemSet in;
                         std::cin >> in;
@@ -142,6 +143,7 @@ namespace Graph {
             // Dijkstra
             const int size = graph.getVertexNumber();
             bool visited[size];
+            std::memset(visited, false, sizeof(visited));
             auto& allNodes = graph.getGraphList();
             auto& nameToId = graph.getNameToIdMap();
 
@@ -194,6 +196,7 @@ namespace Graph {
             int size = graph.getVertexNumber();
             int cost = 0;
             bool visited[size];
+            std::memset(visited, false, sizeof(visited));
             std::vector<EdgeNode> minDist(size);
 
             auto& allNodes = graph.getGraphList();
@@ -219,6 +222,42 @@ namespace Graph {
                     }
                 }
                 visited[nextVertex] = true;
+            }
+            return result;
+        }
+
+
+        void DFSv(const std::vector<HeadNode>& allNodes, int time, Vertex cur, Vertex dest, std::vector<Vertex>& path,
+                  bool visited[]) {
+            if (time < 0 || cur == dest) {
+                return;
+            }
+            for (auto& edge : allNodes[cur].adj) {
+                Vertex other = edge.from == cur ? edge.dest : edge.from;
+                if (!visited[other]) {
+                    visited[other] = true;
+                    path.push_back(other);
+                    DFSv(allNodes, time - allNodes[cur].data.visitTime, other, dest, path, visited);
+                    if (path.back() == dest) {
+                        return;
+                    }
+                    visited[other] = false;
+                    path.pop_back();
+                }
+            }
+        }
+
+        std::vector<Vertex> planningRoute(const LGraph& graph, std::string& fromVertexName, std::string& destVertexName,
+                                          int time) {
+            std::vector<Vertex> result;
+            bool visited[graph.getVertexNumber()];
+            std::memset(visited, false, sizeof(visited));
+            auto& allNodes = graph.getGraphList();
+            Vertex from = graph.getIdByName(fromVertexName), dest = graph.getIdByName(destVertexName);
+            result.push_back(from);
+            DFSv(allNodes, time - allNodes[from].data.visitTime, from, dest, result, visited);
+            if (result.back() != dest) {
+                result.clear();
             }
             return result;
         }

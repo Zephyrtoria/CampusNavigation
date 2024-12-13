@@ -63,6 +63,7 @@ namespace Graph {
                             const std::string& destName); //计算单源最短路径
         int topologicalShortestPath(const LGraph& graph, std::vector<std::string> path); //计算拓扑受限的最短路径
         std::vector<EdgeNode> minimumSpanningTree(const LGraph& graph); //计算最小生成树
+        std::vector<Vertex> planningRoute(const LGraph& graph, std::string& fromVertexName, std::string& destVertexName, int time);
     }
 }
 #endif //CAMPUSNAVIGATION_ALGORITHM_H

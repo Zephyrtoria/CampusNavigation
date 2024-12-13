@@ -87,7 +87,9 @@ namespace Graph {
         std::vector<EdgeNode> getSortedEdges(
             std::function<bool(const EdgeNode& a, const EdgeNode& b)> cmp = compare
         ) const; // 返回边权按值排序的结果(从小到大)
-        std::string getVertexName(Vertex vertex);
+        std::string getNameById(Vertex vertex) const;
+        Vertex getIdByName(const std::string& name) const;
+
     };
 }
 #endif  // LGRAPH_LGRAPH_H

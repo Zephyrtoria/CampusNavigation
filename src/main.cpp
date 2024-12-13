@@ -54,7 +54,7 @@ int main() {
             << "6.求最小生成树" << std::endl
             << "7.求解拓扑受限时的最短路径" << std::endl
             << "8.使图连通" << std::endl
-            << "9.（自定功能）" << std::endl
+            << "9.根据起点和终点和耗时规划路径（自定功能）" << std::endl
             << "10.退出程序" << std::endl
             << "请输入操作前的数字：";
         std::cin >> choice;
@@ -152,10 +152,10 @@ int main() {
             if (haveEulerCircle(graph)) {
                 std::cout << "存在欧拉回路" << std::endl;
                 auto circle = eulerCircle(graph);
-                std::cout << circle.front();
+                std::cout << graph.getNameById(circle.front());
                 circle.pop_front();
                 for (const auto v : circle) {
-                    std::cout << " ---> " << v;
+                    std::cout << " ---> " << graph.getNameById(v);
                 }
                 std::cout << std::endl;
             } else {
@@ -208,6 +208,20 @@ int main() {
                 makeGraphConnected(graph);
             } else {
                 std::cout << "图已经连通了！" << std::endl;
+            }
+        } else if (choice == 9) {
+            std::string from, dest;
+            int time;
+            std::cout << "请输入起点、终点和计划耗时（使用空格分割）： ";
+            std::cin >> from >> dest >> time;
+            auto route = planningRoute(graph, from, dest, time);
+            if (route.empty()) {
+                std::cout << "无法规划路径，可能计划耗时不足" << std::endl;
+                continue;
+            }
+            for (auto each : route) {
+                auto vertexInfo = graph.getVertex(each);
+                std::cout << "在地点：" << vertexInfo.name << ",耗时：" << vertexInfo.visitTime << std::endl;
             }
         } else {
             std::cout << "感谢您的使用，再见！\n 开发者：吴律声" << std::endl;

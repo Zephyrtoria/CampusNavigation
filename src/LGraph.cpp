@@ -37,7 +37,7 @@ namespace Graph {
         }
 
         // 删除与该点相连的所有边
-        Vertex deleteId = nameToId.at(vertexInfo.name);
+        Vertex deleteId = getIdByName(vertexInfo.name);
         HeadNode& deleteHead = graphList.at(deleteId);
         std::list<EdgeNode>& deleteList = deleteHead.adj;
         for (auto& each : deleteList) {
@@ -60,7 +60,7 @@ namespace Graph {
             throw GraphException("");
         }
 
-        Vertex updateId = nameToId.at(oldVertexInfo.name);
+        Vertex updateId = getIdByName(oldVertexInfo.name);
         nameToId.at(newVertexInfo.name) = updateId;
         idToName.at(updateId) = newVertexInfo.name;
         nameToId.erase(oldVertexInfo.name);
@@ -73,7 +73,7 @@ namespace Graph {
         if (!vertexIsExist(name)) {
             throw GraphException("");
         }
-        return graphList[nameToId.at(name)].data;
+        return graphList[getIdByName(name)].data;
     }
 
     VertInfo LGraph::getVertex(const Vertex searchId) const {
@@ -90,8 +90,8 @@ namespace Graph {
             std::cout << "端点不存在或者已经被删除" << std::endl;
             return false;
         }
-        Vertex fromId = nameToId.at(fromVertexName);
-        Vertex destId = nameToId.at(destVertexName);
+        Vertex fromId = getIdByName(fromVertexName);
+        Vertex destId = getIdByName(destVertexName);
         EdgeNode temp{fromId, destId, NIL};
         for (auto& edge : graphList.at(fromId).adj) {
             if (edge == temp) {
@@ -113,7 +113,7 @@ namespace Graph {
         if (edgeIsExist(fromVertexName, destVertexName)) {
             return;
         }
-        Vertex fromId = nameToId.at(fromVertexName), destId = nameToId.at(destVertexName);
+        Vertex fromId = getIdByName(fromVertexName), destId = getIdByName(destVertexName);
         edgesNumber++;
         EdgeNode a{fromId, destId, weight};
         graphList[fromId].adj.push_back(a);
@@ -127,7 +127,7 @@ namespace Graph {
             throw GraphException("");
         }
 
-        Vertex fromId = nameToId.at(fromVertexName), destId = nameToId.at(destVertexName);
+        Vertex fromId = getIdByName(fromVertexName), destId = getIdByName(destVertexName);
 
         EdgeNode temp{fromId, destId, NIL};
         for (auto& edge : graphList[fromId].adj) {
@@ -147,7 +147,7 @@ namespace Graph {
 
     void LGraph::deleteEdge(Vertex fromVertexName, Vertex destVertexName) {
         //TODO:删除边，由两个节点ID确定一条边
-        deleteEdge(getVertexName(fromVertexName), getVertexName(destVertexName));
+        deleteEdge(getNameById(fromVertexName), getNameById(destVertexName));
     }
 
 
@@ -157,7 +157,7 @@ namespace Graph {
             fromVertexName, destVertexName)) {
             throw GraphException("");
         }
-        Vertex fromId = nameToId.at(fromVertexName), destId = nameToId.at(destVertexName);
+        Vertex fromId = getIdByName(fromVertexName), destId = getIdByName(destVertexName);
         EdgeNode temp{fromId, destId, NIL};
         for (auto& edge : graphList[fromId].adj) {
             if (edge == temp) {
@@ -178,7 +178,7 @@ namespace Graph {
         if (!vertexIsExist(fromVertexName) || !vertexIsExist(destVertexName)) {
             throw GraphException("");
         }
-        Vertex fromId = nameToId.at(fromVertexName), destId = nameToId.at(destVertexName);
+        Vertex fromId = getIdByName(fromVertexName), destId = getIdByName(destVertexName);
         EdgeNode temp{fromId, destId, NIL};
         for (auto& edge : graphList[fromId].adj) {
             if (edge == temp) {
@@ -201,7 +201,12 @@ namespace Graph {
         return result;
     }
 
-    std::string LGraph::getVertexName(Vertex vertex) {
+    std::string LGraph::getNameById(Vertex vertex) const {
         return idToName.at(vertex);
     }
+
+    Vertex LGraph::getIdByName(const std::string& name) const {
+        return nameToId.at(name);
+    }
+
 }
