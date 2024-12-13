@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <cassert>
+#include <list>
 #include "../include/LGraph.h"
 #include "../include/Algorithm.h"
 #include "../include/LocationInfo.h"
@@ -48,7 +49,7 @@ int main() {
             << "1.顶点相关操作" << std::endl
             << "2.边相关操作" << std::endl
             << "3.从文件中重新加载点与边" << std::endl
-            << "4.是否存在欧拉通路" << std::endl
+            << "4.求欧拉通路（注意：使用后会破坏图的内容，请提前保存修改）" << std::endl
             << "5.求任意两点间的最短距离" << std::endl
             << "6.求最小生成树" << std::endl
             << "7.求解拓扑受限时的最短路径" << std::endl
@@ -148,21 +149,31 @@ int main() {
         } else if (choice == 3) {// 从文件中重新加载点与边
             init(graph);
         } else if (choice == 4) { // 是否存在欧拉通路
-            auto res = HaveEulerCircle(graph);
-            std::cout << (res ? "存在欧拉回路" : "不存在欧拉回路") << std::endl;
+            if (haveEulerCircle(graph)) {
+                std::cout << "存在欧拉回路" << std::endl;
+                auto circle = eulerCircle(graph);
+                std::cout << circle.front();
+                circle.pop_front();
+                for (const auto v : circle) {
+                    std::cout << " ---> " << v;
+                }
+                std::cout << std::endl;
+            } else {
+                std::cout << "不存在欧拉回路" << std::endl;
+            }
         } else if (choice == 5) { // 求任意两点间的最短距离
             std::cout << "请输入两个地点，使用空格分开：" << std::endl;
             std::string x, y;
             std::cin >> x >> y;
             try {
-                std::cout << x << "和" << y << "之间的最短距离为：" << GetShortestPath(graph, x, y) << std::endl;
+                std::cout << x << "和" << y << "之间的最短距离为：" << getShortestPath(graph, x, y) << std::endl;
             } catch (Graph::GraphException& e) {
                 std::cout << "你找到了虚空的距离" << std::endl;
             }
         } else if (choice == 6) { // 求最小生成树
             if (isConnected(graph)) {
                 std::cout << "最小生成树的点如下：";
-                auto res = MinimumSpanningTree(graph);
+                auto res = minimumSpanningTree(graph);
                 int sum = 0;
                 for (auto item : res) {
                     const auto& e = edge{
@@ -191,7 +202,7 @@ int main() {
                 std::cin >> x;
                 list.push_back(x);
             }
-            std::cout << "最短路径为" << TopologicalShortestPath(graph, list) << std::endl;
+            std::cout << "最短路径为" << topologicalShortestPath(graph, list) << std::endl;
         } else if (choice == 8) {
             if (!isConnected(graph)) {
                 makeGraphConnected(graph);

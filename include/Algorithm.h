@@ -55,14 +55,14 @@ namespace Graph {
             }
         };
 
-        std::list<Vertex> EulerCircle(const LGraph& graph); //计算欧拉回路
-        bool HaveEulerCircle(const LGraph& graph); //判断是否存在欧拉回路
+        std::list<Vertex> eulerCircle(LGraph& graph); //计算欧拉回路
+        bool haveEulerCircle(const LGraph& graph); //判断是否存在欧拉回路
         bool isConnected(const LGraph& graph); //判断图是否联通
         void makeGraphConnected(LGraph& graph); // 添加边
-        int GetShortestPath(const LGraph& graph, const std::string& sourceName,
+        int getShortestPath(const LGraph& graph, const std::string& sourceName,
                             const std::string& destName); //计算单源最短路径
-        int TopologicalShortestPath(const LGraph& graph, std::vector<std::string> path); //计算拓扑受限的最短路径
-        std::vector<EdgeNode> MinimumSpanningTree(const LGraph& graph); //计算最小生成树
+        int topologicalShortestPath(const LGraph& graph, std::vector<std::string> path); //计算拓扑受限的最短路径
+        std::vector<EdgeNode> minimumSpanningTree(const LGraph& graph); //计算最小生成树
     }
 }
 #endif //CAMPUSNAVIGATION_ALGORITHM_H

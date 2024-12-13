@@ -3,6 +3,7 @@
 //
 #include "../include/Algorithm.h"
 #include <queue>
+#include <stack>
 #include <cstring>
 #include <random>
 
@@ -10,57 +11,51 @@
 
 namespace Graph {
     namespace Algorithm {
-        std::list<Vertex> GetCircuit(LGraph graph, Vertex start) {
+        std::list<Vertex> getCircuit(LGraph& graph, Vertex start) {
             //TODO:从给定点出发获得一条回路
-            std::list<Vertex> result;
-            auto& allNodes = graph.getGraphList();
             int size = graph.getVertexNumber();
             bool visited[size];
-            std::queue<Vertex> queue;
-            queue.push(start);
-            while (!queue.empty()) {
-                auto& curId = queue.front();
-                queue.pop();
-                auto& curNode = allNodes.at(curId);
-                result.push_back(curId);
-                visited[start] = true;
-                for (auto& each : curNode.adj) {
-                    Vertex to = each.from == curId ? each.dest : each.from;
-                    if (to == start) {
-                        result.push_back(to);
-                        return result;
-                    }
-                    if (!visited[to]) {
-                        queue.push(to);
-                        graph.deleteEdge(curId, to);
-                    }
+            std::list<Vertex> result;
+            std::stack<Vertex> curPath;
+            auto& allNodes = graph.getGraphList();
+
+            curPath.push(start);
+            while (!curPath.empty()) {
+                Vertex u = curPath.top();
+                if (!allNodes[u].adj.empty()) {
+                    auto& edge = allNodes[u].adj.front();
+                    Vertex other = edge.from == u ? edge.dest : edge.from;
+                    curPath.push(other);
+                    graph.deleteEdge(u, other);
+                } else {
+                    result.push_back(u);
+                    curPath.pop();
                 }
             }
             return result;
         }
 
-        std::list<Vertex> EulerCircle(const LGraph& graph) {
+        std::list<Vertex> eulerCircle(LGraph& graph) {
             //TODO:获取欧拉回路,你可以使用GetCircuit函数
             std::list<Vertex> result;
-            if (!HaveEulerCircle(graph)) {
+            if (!haveEulerCircle(graph)) {
                 return result;
             }
-            std::cerr << "EulerCircle 还没实现" << std::endl;
-            return {};
+            return getCircuit(graph, 0);
         }
 
-        bool HaveEulerCircle(const LGraph& graph) {
+        bool haveEulerCircle(const LGraph& graph) {
             //TODO:判断是否有欧拉回路
-            // 判断是否连通
-            if (!isConnected(graph)) {
-                return false;
-            }
             // 没有奇度节点
             auto& allNodes = graph.getGraphList();
             for (auto& each : allNodes) {
                 if (each.adj.size() % 2 != 0) {
                     return false;
                 }
+            }
+            // 判断是否连通
+            if (!isConnected(graph)) {
+                return false;
             }
             return true;
         }
@@ -134,7 +129,7 @@ namespace Graph {
             }
         }
 
-        int GetShortestPath(const LGraph& graph, const std::string& sourceName, const std::string& destName) {
+        int getShortestPath(const LGraph& graph, const std::string& sourceName, const std::string& destName) {
             // TODO:获取两点之间的最短路径
             // 判断点是否存在
             if (!graph.vertexIsExist(sourceName) || !graph.vertexIsExist(destName)) {
@@ -182,17 +177,17 @@ namespace Graph {
         }
 
 
-        int TopologicalShortestPath(const LGraph& graph, std::vector<std::string> path) {
+        int topologicalShortestPath(const LGraph& graph, std::vector<std::string> path) {
             //TODO:获取拓扑受限的最短路径，拓扑序由path给出
             int cost = 0;
             int size = path.size();
             for (int i = 0; i < size - 1; i++) {
-                cost += GetShortestPath(graph, path.at(i), path.at(i + 1));
+                cost += getShortestPath(graph, path.at(i), path.at(i + 1));
             }
             return cost;
         }
 
-        std::vector<EdgeNode> MinimumSpanningTree(const LGraph& graph) {
+        std::vector<EdgeNode> minimumSpanningTree(const LGraph& graph) {
             // TODO:计算最小生成树，并返回树上的边
             // 使用Prim算法
             std::vector<EdgeNode> result;
