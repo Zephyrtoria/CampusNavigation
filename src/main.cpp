@@ -52,7 +52,9 @@ int main() {
             << "5.求任意两点间的最短距离" << std::endl
             << "6.求最小生成树" << std::endl
             << "7.求解拓扑受限时的最短路径" << std::endl
-            << "8.退出程序" << std::endl
+            << "8.使图连通" << std::endl
+            << "9.（自定功能）" << std::endl
+            << "10.退出程序" << std::endl
             << "请输入操作前的数字：";
         std::cin >> choice;
         if (choice == 1) { // 顶点相关操作
@@ -173,6 +175,11 @@ int main() {
                 std::cout << "总权重为" << sum << std::endl;
             } else {
                 std::cout << "图不连通" << std::endl;
+                std::cout << "是否需要添加边使图连通？（是：1; 否：其他）" << std::endl;
+                std::cin >> choice;
+                if (choice == 1) {
+                    makeGraphConnected(graph);
+                }
             }
         } else if (choice == 7) { // 求解拓扑受限时的最短路径
             std::cout << "请输入您希望的拓扑序，第一行一个n为序列长度，第二行n个地点为拓扑序列" << std::endl;
@@ -185,6 +192,12 @@ int main() {
                 list.push_back(x);
             }
             std::cout << "最短路径为" << TopologicalShortestPath(graph, list) << std::endl;
+        } else if (choice == 8) {
+            if (!isConnected(graph)) {
+                makeGraphConnected(graph);
+            } else {
+                std::cout << "图已经连通了！" << std::endl;
+            }
         } else {
             std::cout << "感谢您的使用，再见！\n 开发者：吴律声" << std::endl;
             break;

@@ -1,5 +1,5 @@
 //
-// Created by Lenovo on 2024/12/10.
+// Created by Zephyrtoria on 2024/12/10.
 //
 
 #ifndef LGRAPH_LGRAPH_H
@@ -20,10 +20,13 @@ namespace Graph {
     typedef int GElemSet;  /* 边权类型，这里使用int类型 */
     typedef LocationInfo VertInfo; /* 顶点信息类型，这里使用LocationInfo */
     constexpr int NIL = -1;         /* 顶点不存在时的返回值 */
+    constexpr int INF = 0x3f3f3f3f;
 
     struct EdgeNode {
         Vertex from, dest;     /* 边的另一端点编号 */
         GElemSet weight; /* 权重 */
+        EdgeNode(): from(INF), dest(INF), weight(INF) {}
+
         EdgeNode(Vertex from, Vertex dest, GElemSet weight)
             : from(from), dest(dest), weight(weight) {}
 
@@ -33,7 +36,10 @@ namespace Graph {
     };
 
     inline bool compare(const EdgeNode& a, const EdgeNode& b) {
-        return a.weight < b.weight;
+        if (a.from == b.from) {
+            return a.dest < b.dest;
+        }
+        return a.from < b.from;
     }
 
     struct HeadNode {
@@ -71,6 +77,7 @@ namespace Graph {
 
         bool edgeIsExist(const std::string& fromVertexName,
                          const std::string& destVertexName) const; // 查询边是否存在，存在返回true
+        void insertEdge(Vertex fromVertex, Vertex destVertex, GElemSet weight);
         void insertEdge(const std::string& fromVertexName, const std::string& destVertexName, GElemSet weight);// 插入边
         void deleteEdge(const std::string& fromVertexName, const std::string& destVertexName); // 删除边
         void deleteEdge(Vertex fromVertexName, Vertex destVertexName); // 删除边
@@ -80,6 +87,7 @@ namespace Graph {
         std::vector<EdgeNode> getSortedEdges(
             std::function<bool(const EdgeNode& a, const EdgeNode& b)> cmp = compare
         ) const; // 返回边权按值排序的结果(从小到大)
+        std::string getVertexName(Vertex vertex);
     };
 }
 #endif  // LGRAPH_LGRAPH_H

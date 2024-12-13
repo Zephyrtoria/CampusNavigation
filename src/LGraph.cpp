@@ -1,5 +1,5 @@
 //
-// Created by Lenovo on 2024/12/10.
+// Created by Zephyrtoria on 2024/12/10.
 //
 
 #include "../include/LGraph.h"
@@ -101,10 +101,17 @@ namespace Graph {
         return false;
     }
 
+    void LGraph::insertEdge(Vertex fromVertex, Vertex destVertex, GElemSet weight) {
+        insertEdge(idToName.at(fromVertex), idToName.at(destVertex), weight);
+    }
+
     void LGraph::insertEdge(const std::string& fromVertexName, const std::string& destVertexName, GElemSet weight) {
         //TODO:插入边
         if (!vertexIsExist(fromVertexName) || !vertexIsExist(destVertexName)) {
             throw GraphException("");
+        }
+        if (edgeIsExist(fromVertexName, destVertexName)) {
+            return;
         }
         Vertex fromId = nameToId.at(fromVertexName), destId = nameToId.at(destVertexName);
         edgesNumber++;
@@ -140,7 +147,7 @@ namespace Graph {
 
     void LGraph::deleteEdge(Vertex fromVertexName, Vertex destVertexName) {
         //TODO:删除边，由两个节点ID确定一条边
-        deleteEdge(idToName.at(fromVertexName), idToName.at(destVertexName));
+        deleteEdge(getVertexName(fromVertexName), getVertexName(destVertexName));
     }
 
 
@@ -171,9 +178,6 @@ namespace Graph {
         if (!vertexIsExist(fromVertexName) || !vertexIsExist(destVertexName)) {
             throw GraphException("");
         }
-        if (!edgeIsExist(fromVertexName, destVertexName)) {
-            throw GraphException("");
-        }
         Vertex fromId = nameToId.at(fromVertexName), destId = nameToId.at(destVertexName);
         EdgeNode temp{fromId, destId, NIL};
         for (auto& edge : graphList[fromId].adj) {
@@ -181,7 +185,7 @@ namespace Graph {
                 return edge.weight;
             }
         }
-        return NIL;
+        return INF;
     }
 
     std::vector<EdgeNode> LGraph::getSortedEdges(std::function<bool(const EdgeNode& a, const EdgeNode& b)> cmp) const {
@@ -195,5 +199,9 @@ namespace Graph {
         std::sort(result.begin(), result.end(), std::move(cmp));
         result.erase(std::unique(result.begin(), result.end()), result.end());
         return result;
+    }
+
+    std::string LGraph::getVertexName(Vertex vertex) {
+        return idToName.at(vertex);
     }
 }

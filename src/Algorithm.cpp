@@ -1,35 +1,63 @@
 //
-// Created by Lenovo on 2024/12/10.
+// Created by Zephyrtoria on 2024/12/10.
 //
 #include "../include/Algorithm.h"
 #include <queue>
-#include <string.h>
+#include <cstring>
+#include <random>
+
+#include "../include/GraphException.h"
 
 namespace Graph {
     namespace Algorithm {
-        const int INF = 0x3f3f3f3f;
-
-        std::list<Vertex> GetCircuit(LGraph& graph, Vertex start) {
+        std::list<Vertex> GetCircuit(LGraph graph, Vertex start) {
             //TODO:从给定点出发获得一条回路
-            return {};
+            std::list<Vertex> result;
+            auto& allNodes = graph.getGraphList();
+            int size = graph.getVertexNumber();
+            bool visited[size];
+            std::queue<Vertex> queue;
+            queue.push(start);
+            while (!queue.empty()) {
+                auto& curId = queue.front();
+                queue.pop();
+                auto& curNode = allNodes.at(curId);
+                result.push_back(curId);
+                visited[start] = true;
+                for (auto& each : curNode.adj) {
+                    Vertex to = each.from == curId ? each.dest : each.from;
+                    if (to == start) {
+                        result.push_back(to);
+                        return result;
+                    }
+                    if (!visited[to]) {
+                        queue.push(to);
+                        graph.deleteEdge(curId, to);
+                    }
+                }
+            }
+            return result;
         }
 
         std::list<Vertex> EulerCircle(const LGraph& graph) {
             //TODO:获取欧拉回路,你可以使用GetCircuit函数
+            std::list<Vertex> result;
+            if (!HaveEulerCircle(graph)) {
+                return result;
+            }
             std::cerr << "EulerCircle 还没实现" << std::endl;
             return {};
         }
 
         bool HaveEulerCircle(const LGraph& graph) {
             //TODO:判断是否有欧拉回路
-
             // 判断是否连通
             if (!isConnected(graph)) {
                 return false;
             }
-            // 判断每个顶点的度是否为偶数
-            auto& head_nodes = graph.getGraphList();
-            for (auto& each : head_nodes) {
+            // 没有奇度节点
+            auto& allNodes = graph.getGraphList();
+            for (auto& each : allNodes) {
                 if (each.adj.size() % 2 != 0) {
                     return false;
                 }
@@ -37,23 +65,21 @@ namespace Graph {
             return true;
         }
 
-        void BFSv(const LGraph& graph, Vertex v, std::vector<bool>& visited) {
+        void BFSv(const LGraph& graph, Vertex start, std::vector<bool>& visited) {
             //TODO:广度优先搜索整个图
-            std::vector<Vertex> result;
-            std::queue<HeadNode> q;
-            auto& nodes = graph.getGraphList();
+            std::queue<Vertex> q;
+            auto& allNodes = graph.getGraphList();
             auto& map = graph.getNameToIdMap();
-            q.push(nodes.at(v));
+            q.push(start);
             while (!q.empty()) {
-                auto& cur = q.front();
+                auto& curId = q.front();
                 q.pop();
-                Vertex thiss = map.at(cur.data.name);
-                visited[thiss] = true;
-                result.push_back(thiss);
-                for (auto& each : cur.adj) {
-                    Vertex other = (thiss == each.from) ? each.dest : each.from;
+                auto& curNode = allNodes[curId];
+                visited[curId] = true;
+                for (auto& each : curNode.adj) {
+                    Vertex other = (curId == each.from) ? each.dest : each.from;
                     if (!visited[other]) {
-                        q.push(nodes.at(other));
+                        q.push(other);
                     }
                 }
             }
@@ -61,36 +87,109 @@ namespace Graph {
 
         bool isConnected(const LGraph& graph) {
             //TODO:判断图是否联通
-            DSU dsu(graph.getVertexNumber());
+            int size = graph.getVertexNumber();
+            DSU dsu(size);
             auto& allNodes = graph.getGraphList();
             auto& nameToId = graph.getNameToIdMap();
-            for (const auto& ve : allNodes) {
-                Vertex from = nameToId.at(ve.data.name);
-                for (const auto& edge : ve.adj) {
-                    Vertex dest = edge.from == from ? dest : from;
-                    dsu.unite(from, dest);
+            for (Vertex i = 0; i < size; i++) {
+                for (const auto& edge : allNodes[i].adj) {
+                    Vertex dest = edge.from == i ? edge.dest : edge.from;
+                    dsu.unite(i, dest);
                 }
             }
             return dsu.isSingle();
         }
 
+        void makeGraphConnected(LGraph& graph) {
+            int size = graph.getVertexNumber();
+            DSU dsu(size);
+            auto& allNodes = graph.getGraphList();
+            auto& nameToId = graph.getNameToIdMap();
+            for (Vertex i = 0; i < size; i++) {
+                for (const auto& edge : allNodes[i].adj) {
+                    Vertex dest = edge.from == i ? edge.dest : edge.from;
+                    dsu.unite(i, dest);
+                }
+            }
+            std::random_device rd;  // 真随机数生成器
+            std::mt19937 gen(rd()); // Mersenne Twister 引擎
+            std::uniform_int_distribution<> dis(0, 500);  // 生成 0 到 500 之间的整数
+            std::uniform_int_distribution<> vex(0, size - 1);  // 生成 0 到 size - 1 之间的整数
+            while (!dsu.isSingle()) {
+                Vertex i = vex(gen);
+                for (Vertex j = 0; j < size; j++) {
+                    if (!dsu.same(i, j)) {
+                        std::cout << "地点" << graph.getVertexName(i) << "与" << graph.getVertexName(j) <<
+                            "之间不连通，请输入边的权重（输入0则会添加随机权重） ";
+                        GElemSet in;
+                        std::cin >> in;
+                        if (in == 0) {
+                            in = dis(gen);
+                        }
+                        graph.insertEdge(i, j, in);
+                        dsu.unite(i, j);
+                        break;
+                    }
+                }
+            }
+        }
+
         int GetShortestPath(const LGraph& graph, const std::string& sourceName, const std::string& destName) {
             // TODO:获取两点之间的最短路径
-            // 使用Dijkstra算法
-            if (!isConnected(graph)) {
-                return NIL;
+            // 判断点是否存在
+            if (!graph.vertexIsExist(sourceName) || !graph.vertexIsExist(destName)) {
+                throw GraphException("");
             }
-            int result = 0;
+            // 同一个点
+            if (sourceName == destName) {
+                return 0;
+            }
+            // Dijkstra
+            const int size = graph.getVertexNumber();
+            bool visited[size];
             auto& allNodes = graph.getGraphList();
-            bool visited[graph.getVertexNumber()];
-            return 0;
+            auto& nameToId = graph.getNameToIdMap();
+
+            Vertex start = nameToId.at(sourceName), end = nameToId.at(destName);
+            GElemSet minDist[size];
+            std::memset(minDist, 0x3f, sizeof(minDist));
+            minDist[start] = 0;
+
+            for (int i = 0; i < size; i++) {
+                Vertex nextVertex = -1;
+                for (Vertex j = 0; j < size; j++) {
+                    if (!visited[j] && (nextVertex == -1 || minDist[nextVertex] > minDist[j])) {
+                        nextVertex = j;
+                    }
+                }
+
+                if (nextVertex == end) {
+                    return minDist[end];
+                }
+
+                // 更新距离
+                for (Vertex j = 0; j < size; j++) {
+                    GElemSet t = graph.getEdgeWeight(allNodes[nextVertex].data.name, allNodes[j].data.name);
+                    minDist[j] = std::min(minDist[j], minDist[nextVertex] + t);
+                }
+                visited[nextVertex] = true;
+            }
+            // 已经判断是否能走到
+            if (minDist[end] == INF) {
+                throw GraphException("");
+            }
+            return minDist[end];
         }
 
 
         int TopologicalShortestPath(const LGraph& graph, std::vector<std::string> path) {
             //TODO:获取拓扑受限的最短路径，拓扑序由path给出
-            std::cerr << "TopologicalShortestPath 还没实现" << std::endl;
-            return -1;
+            int cost = 0;
+            int size = path.size();
+            for (int i = 0; i < size - 1; i++) {
+                cost += GetShortestPath(graph, path.at(i), path.at(i + 1));
+            }
+            return cost;
         }
 
         std::vector<EdgeNode> MinimumSpanningTree(const LGraph& graph) {
@@ -100,10 +199,7 @@ namespace Graph {
             int size = graph.getVertexNumber();
             int cost = 0;
             bool visited[size];
-            std::vector<EdgeNode> minDist;
-            for (int i = 0; i < size; i++) {
-                minDist.push_back({INF, INF, INF});
-            }
+            std::vector<EdgeNode> minDist(size);
 
             auto& allNodes = graph.getGraphList();
             for (int i = 0; i < size; i++) {
@@ -116,9 +212,9 @@ namespace Graph {
                 // 必然连通，不做连通性判断了
                 if (i != 0) {
                     cost += minDist[nextVertex].weight;
+                    result.push_back(minDist[nextVertex]);
                 }
                 // 添加结果
-                result.push_back(minDist[nextVertex]);
                 for (Vertex j = 0; j < size; j++) {
                     GElemSet t = graph.getEdgeWeight(allNodes[nextVertex].data.name, allNodes[j].data.name);
                     if (t < minDist[j].weight) {
